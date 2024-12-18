@@ -18,6 +18,6 @@
 整体效果呈现了旅行足迹的可视化，方便用户记录和展示旅行经历。
 
 
-效果图链接：![图片描述]([https://example.com/image.jpg](https://github.com/reshuige/Camarts/blob/main/%E5%BE%AE%E4%BF%A1%E6%88%AA%E5%9B%BE_20241219020841.png))
+效果图链接：![效果图](https://example.com/image.jpg](https://github.com/reshuige/Camarts/blob/main/%E5%BE%AE%E4%BF%A1%E6%88%AA%E5%9B%BE_20241219020841.png)
 
  
