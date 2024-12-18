@@ -16,9 +16,9 @@ OpenStreetMap 是一个由全球志愿者创建和维护的开源地图项目。
 
 使用者需自行注册百度的 API，注册地址为控制台 | 百度地图开放平台，且要将其替换为自己申请的内容。https://lbsyun.baidu.com/apiconsole/key
 
-![api]((https://github.com/reshuige/Camarts/blob/main/images/uid.png?raw=true))
+![uid](https://github.com/reshuige/Camarts/blob/main/images/uid.png)
 
-![api]((https://github.com/reshuige/Camarts/blob/main/images/api.png?raw=true))
+![api](https://github.com/reshuige/Camarts/blob/main/images/api.png)
 
 
 - **创建地图实例并设置基本属性**：
