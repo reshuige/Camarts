@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>热水哥 - 我的足迹</title>
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=1.0&&type=webgl&ak=xJFXr0zR6XZnpu9seJHI9D2KsJcdjcsq"></script>
+    <style>
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+    .map-card {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            width: 70%;
+            height: 100vh;
+            margin: 0;
+            background-color: #fff;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            background-color: #353535;
+        }
+
+        /* 新增的栅格系统容器样式 */
+    .grid-container {
+            width: 30%;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        /* 单个栅格项（图片）样式 */
+    .grid-item {
+            width: calc(50% - 5px);
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        /* 图片样式 */
+    .grid-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="map-card">
+        <div id="map"></div>
+    </div>
+    <!-- 新增的栅格系统容器 -->
+    <div class="grid-container"></div>
+    <script type="text/javascript">
+        // 创建地图实例
+        var map = new BMapGL.Map("map");
+        // 设置大致为中国中心位置的坐标作为初始中心点（可根据需求调整更合适的初始中心展示位置）
+        var centerPoint = new BMapGL.Point(108, 34);
+        map.centerAndZoom(centerPoint, 5.5);
+        map.enableScrollWheelZoom(true);
+
+        // 足迹位置数据数组，格式为[{latLng: [经度，纬度], name: '城市名称'}]
+        var markersData = [
+            { latLng: [112.53, 32.99], name: '河南-南阳' },
+            { latLng: [121.16, 30.04], name: '浙江-余姚' },
+            { latLng: [113.30, 40.08], name: '山西-大同' },
+            { latLng: [104.07, 30.57], name: '四川-成都' },
+            { latLng: [106.55, 29.57], name: '重庆' },
+            { latLng: [104.64, 28.75], name: '四川-宜宾' },
+            { latLng: [113.92, 30.93], name: '湖北-孝感' },
+            { latLng: [113.57, 30.93], name: '湖北-应城' },
+            { latLng: [114.31, 30.59], name: '湖北-武汉' },
+            { latLng: [113.46, 30.36], name: '湖北-仙桃' },
+            { latLng: [112.90, 30.40], name: '湖北-潜江' },
+            { latLng: [121.27, 30.17], name: '浙江-慈溪' }
+        ];
+
+        // 模拟根据城市名称获取对应多张图片路径的函数，现在返回包含更多信息的对象数组
+        function getImagePathsForCity(cityName) {
+            return [
+                {
+                    "path": 'images/' + cityName + '1.png',
+                    "shootTime": "2024-01-01 10:00:00",
+                    "description": "这是在城市中心拍摄的著名建筑。",
+                    "author": "张三",
+                },
+                {
+                    "path": 'images/' + cityName + '2.png',
+                    "shootTime": "2024-02-15 14:30:00",
+                    "description": "当地的特色美食摊位。",
+                    "author": "李四",
+                },
+                {
+                    "path": 'images/' + cityName + '3.png',
+                    "shootTime": "2024-03-20 09:15:00",
+                    "description": "美丽的海边日落景色。",
+                    "author": "王五",
+                },
+                {
+                    "path": 'images/' + cityName + '4.png',
+                    "shootTime": "2024-04-05 16:45:00",
+                    "description": "古老的街道，充满历史气息。",
+                    "author": "赵六",
+                }
+            ];
+        }
+
+        // 用于存储图片与对应网页链接关系的对象（需根据实际情况配置准确的链接）
+        var imageToPageLinks = {
+            "河南-南阳": {
+                "1": "https://example.com/nanyang1.html",
+                "2": "https://example.com/nanyang2.html",
+                "3": "https://example.com/nanyang3.html",
+                "4": "https://example.com/nanyang4.html"
+            },
+            "浙江-余姚": {
+                "1": "https://example.com/yuYao1.html",
+            }
+        };
+
+        // 循环添加足迹标记
+        markersData.forEach(function (markerInfo) {
+            var point = new BMapGL.Point(markerInfo.latLng[0], markerInfo.latLng[1]);
+            var marker = new BMapGL.Marker(point);
+            map.addOverlay(marker);
+
+            // 创建包含图片和城市名称的信息窗口内容
+            var contentDiv = document.createElement('div');
+            contentDiv.style.textAlign = 'center';
+
+            // 创建城市名称元素并添加样式
+            var nameElement = document.createElement('h3');
+            nameElement.textContent = markerInfo.name;
+            nameElement.style.marginBottom = '10px';
+            contentDiv.appendChild(nameElement);
+
+            // 创建图片列表容器，并设置为弹性布局，实现每行两列效果
+            var imgListDiv = document.createElement('div');
+            imgListDiv.style.display = 'flex';
+            imgListDiv.style.flexWrap = 'wrap';
+            imgListDiv.style.justifyContent = 'space-between';
+            imgListDiv.style.width = '320px';
+
+            var imagePaths = getImagePathsForCity(markerInfo.name);
+            imagePaths.forEach(function (imgObj, index) {
+                var imgElement = document.createElement('img');
+                imgElement.src = imgObj.path;
+                imgElement.style.width = '150px';
+                imgElement.style.height = 'auto';
+                imgElement.style.margin = '5px';
+
+                // 添加onerror事件处理函数，当图片加载出错时移除该图片元素
+                imgElement.onerror = function () {
+                    imgElement.parentNode.removeChild(imgElement);
+                };
+
+                // 为每个图片元素添加点击事件监听器，修改为弹出确认和取消的提示框后根据选择跳转网页
+                imgElement.addEventListener('click', function () {
+                    var cityName = markerInfo.name;
+                    var imgIndex = imagePaths.indexOf(imgObj);
+                    imgIndex++;
+                    var targetPageLink = imageToPageLinks[cityName][imgIndex];
+
+                    // 创建自定义的确认提示框
+                    var confirmBox = document.createElement('div');
+                    confirmBox.style.position = 'fixed';
+                    confirmBox.style.top = '50%';
+                    confirmBox.style.left = '50%';
+                    confirmBox.style.transform = 'translate(-50%, -50%)';
+                    confirmBox.style.backgroundColor = 'white';
+                    confirmBox.style.padding = '20px';
+                    confirmBox.style.border = '1px solid gray';
+                    confirmBox.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.2)';
+                    confirmBox.style.zIndex = 9999;
+
+                    var message = document.createElement('p');
+                    message.textContent = "即将跳转到对应网页，是否继续？";
+                    confirmBox.appendChild(message);
+
+                    var confirmButton = document.createElement('button');
+                    confirmButton.textContent = "确认";
+                    confirmButton.addEventListener('click', function () {
+                        window.open(targetPageLink, '_blank');  // 修改此处，在新窗口打开链接
+                        document.body.removeChild(confirmBox);
+                    });
+                    confirmBox.appendChild(confirmButton);
+
+                    var cancelButton = document.createElement('button');
+                    cancelButton.textContent = "取消";
+                    cancelButton.addEventListener('click', function () {
+                        document.body.removeChild(confirmBox);
+                    });
+                    confirmBox.appendChild(cancelButton);
+
+                    document.body.appendChild(confirmBox);
+                });
+
+                imgListDiv.appendChild(imgElement);
+            });
+
+            contentDiv.appendChild(imgListDiv);
+
+            var infoWindow = new BMapGL.InfoWindow(contentDiv);
+            marker.addEventListener('click', function () {
+                map.openInfoWindow(infoWindow, point);
+            });
+        });
+
+        // 新增函数，用于从给定的图片路径数组中随机选取指定数量的图片路径
+        function getRandomImages(imagePaths, num) {
+            var result = [];
+            var indexes = [];
+            while (indexes.length < num && indexes.length < imagePaths.length) {
+                var index = Math.floor(Math.random() * imagePaths.length);
+                if (!indexes.includes(index)) {
+                    indexes.push(index);
+                    result.push(imagePaths[index]);
+                }
+            }
+            return result;
+        }
+
+        // 获取所有地点的所有图片路径，现在是包含更多信息的对象数组
+        var allImagePaths = [];
+        markersData.forEach(function (markerInfo) {
+            var cityImagePaths = getImagePathsForCity(markerInfo.name);
+            allImagePaths = allImagePaths.concat(cityImagePaths);
+        });
+
+        // 从所有图片路径中随机选取一定数量的图片（这里示例选取6张，可根据需求调整）
+        var randomSelectedImages = getRandomImages(allImagePaths, 6);
+
+        // 获取页面中的栅格系统容器元素
+        var gridContainer = document.querySelector('.grid-container');
+
+        // 模拟根据图片路径获取点赞数和收藏数的函数，实际应用中需从服务器获取真实数据
+        function getImageStats(imgPath, cityName) {
+            var likes = Math.floor(Math.random() * 100);
+            var favorites = Math.floor(Math.random() * 50);
+            return {
+                "likes": likes,
+                "favorites": favorites
+            };
+        }
+
+        // 循环创建并添加图片元素到栅格系统容器中，添加多种额外信息并处理图片加载失败情况
+        randomSelectedImages.forEach(function (imgObj) {
+            var gridItem = document.createElement('div');
+            gridItem.classList.add('grid-item');
+
+            var imgElement = document.createElement('img');
+            imgElement.src = imgObj.path;
+            imgElement.style.width = '100%';
+            imgElement.style.height = 'auto';
+
+            // 查找当前图片所属的城市名称，用于显示地点信息
+            var cityName = '';
+            markersData.forEach(function (markerInfo) {
+                var cityImagePaths = getImagePathsForCity(markerInfo.name);
+                var paths = cityImagePaths.map((obj) => obj.path);
+                if (paths.includes(imgObj.path)) {
+                    cityName = markerInfo.name;
+                    return;
+                }
+            });
+
+            // 创建用于显示地点信息的元素（比如span标签）并添加样式
+            var locationElement = document.createElement('span');
+            locationElement.textContent = cityName + " - ";
+            locationElement.style.fontWeight = 'bold';
+            locationElement.style.marginRight = '5px';
+
+            // 创建用于显示拍摄时间的元素并添加样式
+            var shootTimeElement = document.createElement('span');
+            shootTimeElement.textContent = "拍摄时间：" + imgObj.shootTime;
+            shootTimeElement.style.color = 'gray';
+            shootTimeElement.style.fontSize = '12px';
+            shootTimeElement.style.marginLeft = '5px';
+
+            // 创建用于显示照片描述的元素并添加样式
+            var descriptionElement = document.createElement('p');
+            descriptionElement.textContent = imgObj.description;
+            descriptionElement.style.marginTop = '5px';
+            descriptionElement.style.fontStyle = 'italic';
+            descriptionElement.style.color = 'black';
+
+            // 创建用于显示作者信息的元素并添加样式
+            var authorElement = document.createElement('span');
+            authorElement.textContent = "作者：" + imgObj.author;
+            authorElement.style.marginLeft = '5px';
+            authorElement.style.color = 'blue';
+
+            // 获取图片的点赞数和收藏数并创建相应元素添加样式
+            var stats = getImageStats(imgObj.path, cityName);
+            var likesElement = document.createElement('span');
+            likesElement.textContent = "点赞数：" + stats.likes;
+            likesElement.style.marginLeft = '5px';
+            likesElement.style.color = 'green';
+
+            var favoritesElement = document.createElement('span');
+            favoritesElement.textContent = "收藏数：" + stats.favorites;
+            favoritesElement.style.marginLeft = '5px';
+            favoritesElement.style.color = 'orange';
+
+            // 将地点信息元素、拍摄时间元素、描述元素、作者元素、点赞数元素、收藏数元素和图片元素添加到栅格项中
+            gridItem.appendChild(locationElement);
+            gridItem.appendChild(shootTimeElement);
+            gridItem.appendChild(descriptionElement);
+            gridItem.appendChild(authorElement);
+            gridItem.appendChild(likesElement);
+            gridItem.appendChild(favoritesElement);
+            gridItem.appendChild(imgElement);
+
+            // 添加onerror事件处理函数，当图片加载出错时移除整个栅格项（包含所有元素）
+            imgElement.onerror = function () {
+                gridItem.parentNode.removeChild(gridItem);
+            };
+
+            gridContainer.appendChild(gridItem);
+        });
+
+    </script>
+</body>
+
+</html>
