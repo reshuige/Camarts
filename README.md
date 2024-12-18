@@ -3,7 +3,7 @@
 ​
 效果图。
 
-​​
+​​https://github.com/reshuige/Camarts/blob/main/%E5%BE%AE%E4%BF%A1%E6%88%AA%E5%9B%BE_20241219020841.png
 
 一、地图初始化部分
 引入百度地图 API：通过<script>标签引入百度地图的 API 脚本，这是使用百度地图相关功能的基础，确保能正常调用百度地图的各类接口和对象。
